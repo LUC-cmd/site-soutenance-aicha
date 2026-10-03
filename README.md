@@ -14,6 +14,6 @@ Rapport de fin de formation · Licence professionnelle en Assistance administrat
 - Base de données : un service **PostgreSQL** dans le même projet Railway.
 - Variables du service du site :
   - `DATABASE_URL` → référence à la base PostgreSQL (`${{Postgres.DATABASE_URL}}`)
-  - `ADMIN_USER` → identifiant de connexion (ex. Aicha)
-  - `ADMIN_PASSWORD` → mot de passe (les espaces sont ignorés)
+  - `ADMIN_USER` → facultatif, identifiant de connexion (par défaut : Aicha)
+  - Mot de passe : créé sur le site à la première connexion, avec le code d’activation affiché dans les journaux Railway
 - Sans base de données, le site reste consultable avec les documents du dossier `docs/`.

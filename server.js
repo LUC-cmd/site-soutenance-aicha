@@ -5,8 +5,10 @@
    - données dans PostgreSQL (variable DATABASE_URL fournie par Railway)
    Variables Railway à définir :
      DATABASE_URL    -> référence à la base PostgreSQL du projet
-     ADMIN_USER      -> identifiant de connexion (ex. Aicha), ou ADMIN_EMAIL
-     ADMIN_PASSWORD  -> mot de passe (6 caractères minimum, espaces ignorés)
+     ADMIN_USER      -> identifiant de connexion (par défaut : Aicha)
+     ADMIN_PASSWORD  -> facultatif : sinon, le mot de passe est créé sur le site
+                        avec le code d'activation affiché dans les journaux (logs)
+     RESET_PASSWORD=1 -> facultatif : efface le mot de passe enregistré au démarrage
    ===================================================================== */
 'use strict';
 const http = require('http');
@@ -18,10 +20,19 @@ const ROOT = __dirname;
 const PORT = process.env.PORT || 3000;
 const MAX_UPLOAD = 50 * 1024 * 1024;
 // identifiant de connexion : ADMIN_USER (ex. « Aicha ») ou, à défaut, ADMIN_EMAIL
-const ADMIN_EMAIL = (process.env.ADMIN_USER || process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+const ADMIN_EMAIL = (process.env.ADMIN_USER || process.env.ADMIN_EMAIL || 'Aicha').trim().toLowerCase();
 // les espaces sont ignorés : « 90 60 41 60 » = « 90604160 »
 const normPw = (s) => String(s || '').replace(/\s+/g, '');
 const ADMIN_PASSWORD = normPw(process.env.ADMIN_PASSWORD);
+let PW_HASH = null;          // mot de passe créé depuis le site (scrypt, en base)
+let SETUP_CODE = null;       // code d'activation à usage unique, affiché dans les journaux
+const hashPw = (pw, salt = crypto.randomBytes(16).toString('hex')) => 'scrypt$' + salt + '$' + crypto.scryptSync(pw, salt, 64).toString('hex');
+function checkHash(pw, stored) {
+  const [, salt, hex] = String(stored).split('$');
+  if (!salt || !hex) return false;
+  const a = crypto.scryptSync(pw, salt, 64), b = Buffer.from(hex, 'hex');
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 const SESSION_DAYS = 7;
 
 /* ---------------- base de données ---------------- */
@@ -59,10 +70,23 @@ async function initDb() {
       const again = await pool.query(`select value from app_kv where key='session_secret'`); SECRET = again.rows[0].value;
     }
   }
+  if (process.env.RESET_PASSWORD === '1') { await pool.query(`delete from app_kv where key='admin_pw'`); console.log('Mot de passe effacé (RESET_PASSWORD=1). Retirez cette variable après usage.'); }
+  const pw = await pool.query(`select value from app_kv where key='admin_pw'`);
+  PW_HASH = pw.rows.length ? pw.rows[0].value : null;
+  if (!ADMIN_PASSWORD && !PW_HASH) newSetupCode();
   dbReady = true;
   console.log('Base de données prête.');
 }
-const adminConfigured = () => !!(ADMIN_EMAIL && ADMIN_PASSWORD.length >= 6);
+const adminConfigured = () => !!(ADMIN_EMAIL && (ADMIN_PASSWORD.length >= 6 || PW_HASH));
+function newSetupCode() {
+  const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  SETUP_CODE = Array.from(crypto.randomBytes(8), (b) => A[b % A.length]).join('');
+  console.log('==================================================');
+  console.log(' CODE D\'ACTIVATION DE L\'ESPACE PRIVÉ : ' + SETUP_CODE);
+  console.log(' (à saisir une seule fois sur le site, page Connexion)');
+  console.log('==================================================');
+}
+const passwordOk = (pw) => (ADMIN_PASSWORD ? sameText(normPw(pw), ADMIN_PASSWORD) : PW_HASH ? checkHash(normPw(pw), PW_HASH) : false);
 
 /* ---------------- sessions (jeton signé dans un cookie) ---------------- */
 const b64 = (s) => Buffer.from(s).toString('base64url');
@@ -122,7 +146,7 @@ const DOC_COLS = 'id,title,description,category,file_path,file_name,mime,size_by
 /* ---------------- API ---------------- */
 async function api(req, res, p) {
   const m = req.method;
-  if (p === '/api/status') return send(res, 200, { db: dbReady, admin: adminConfigured() });
+  if (p === '/api/status') return send(res, 200, { db: dbReady, admin: adminConfigured(), setup: dbReady && !adminConfigured(), user: process.env.ADMIN_USER || process.env.ADMIN_EMAIL || 'Aicha' });
   if (!dbReady) return fail(res, 503, 'L’espace privé n’est pas encore activé (base de données absente).');
 
   const admin = currentAdmin(req);
@@ -130,12 +154,26 @@ async function api(req, res, p) {
     if (!sameOrigin(req) || req.headers['x-requested-with'] !== 'fetch') return fail(res, 403, 'Requête refusée.');
   }
 
+  if (p === '/api/setup' && m === 'POST') {
+    if (adminConfigured()) return fail(res, 409, 'Le mot de passe est déjà créé : connectez-vous.');
+    const ip = clientIp(req);
+    if (tooMany(ip)) return fail(res, 429, 'Trop de tentatives. Patientez quelques minutes puis réessayez.');
+    const { code, password } = await readJson(req);
+    if (!SETUP_CODE || !sameText(String(code || '').trim().toUpperCase().replace(/\s+/g, ''), SETUP_CODE)) { attempts.get(ip).push(Date.now()); return fail(res, 401, 'Code d’activation incorrect.'); }
+    const pw = normPw(password);
+    if (pw.length < 6) return fail(res, 400, 'Le mot de passe doit contenir au moins 6 caractères.');
+    PW_HASH = hashPw(pw);
+    await pool.query(`insert into app_kv(key,value) values('admin_pw',$1) on conflict (key) do update set value=excluded.value`, [PW_HASH]);
+    SETUP_CODE = null; attempts.delete(ip);
+    setSession(req, res, sign({ email: ADMIN_EMAIL, exp: Date.now() + SESSION_DAYS * 864e5 }), SESSION_DAYS * 86400);
+    return send(res, 200, { email: ADMIN_EMAIL });
+  }
   if (p === '/api/login' && m === 'POST') {
     if (!adminConfigured()) return fail(res, 503, 'Compte administrateur non configuré : ajoutez ADMIN_USER et ADMIN_PASSWORD dans Railway.');
     const ip = clientIp(req);
     if (tooMany(ip)) return fail(res, 429, 'Trop de tentatives. Patientez quelques minutes puis réessayez.');
     const { email, password } = await readJson(req);
-    const ok = sameText(String(email || '').trim().toLowerCase(), ADMIN_EMAIL) & sameText(normPw(password), ADMIN_PASSWORD);
+    const ok = sameText(String(email || '').trim().toLowerCase(), ADMIN_EMAIL) & passwordOk(password);
     if (!ok) { attempts.get(ip).push(Date.now()); return fail(res, 401, 'Identifiant ou mot de passe incorrect.'); }
     attempts.delete(ip);
     setSession(req, res, sign({ email: ADMIN_EMAIL, exp: Date.now() + SESSION_DAYS * 864e5 }), SESSION_DAYS * 86400);
@@ -156,6 +194,16 @@ async function api(req, res, p) {
   // ---- tout ce qui suit est réservé à l'administratrice ----
   if (!admin) return fail(res, 401, 'Action refusée : connectez-vous d’abord.');
 
+  if (p === '/api/password' && m === 'POST') {
+    if (ADMIN_PASSWORD) return fail(res, 409, 'Le mot de passe est fixé dans Railway (variable ADMIN_PASSWORD) : modifiez-le là-bas.');
+    const { current, password } = await readJson(req);
+    if (!passwordOk(current)) return fail(res, 401, 'Mot de passe actuel incorrect.');
+    const pw = normPw(password);
+    if (pw.length < 6) return fail(res, 400, 'Le nouveau mot de passe doit contenir au moins 6 caractères.');
+    PW_HASH = hashPw(pw);
+    await pool.query(`insert into app_kv(key,value) values('admin_pw',$1) on conflict (key) do update set value=excluded.value`, [PW_HASH]);
+    return send(res, 200, { ok: true });
+  }
   if (p === '/api/settings' && m === 'PUT') {
     const s = await readJson(req);
     const data = { date: clean(s.date, 10), time: clean(s.time, 5), place: clean(s.place, 120), message: clean(s.message, 280) };

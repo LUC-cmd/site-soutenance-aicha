@@ -1457,6 +1457,17 @@ nav.top .wrap{gap:15px;max-width:1260px}
         <button class="linkbtn" type="button" id="lgForgot">Mot de passe oublié ?</button>
       </form>
 
+      <form id="setupForm" class="authform" hidden novalidate>
+        <label>Identifiant<input type="text" id="suUser" readonly></label>
+        <label>Code d’activation<input type="text" id="suCode" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required placeholder="Ex. 7KQ2M9PX"></label>
+        <label>Choisissez votre mot de passe
+          <span class="pwfield"><input type="password" id="suPw" autocomplete="new-password" required minlength="6" placeholder="6 caractères minimum">
+          <button type="button" class="pwtoggle" data-for="suPw" aria-label="Afficher le mot de passe">Afficher</button></span>
+        </label>
+        <label>Confirmez le mot de passe<input type="password" id="suPw2" autocomplete="new-password" required></label>
+        <button class="btn solid wide" type="submit" id="suBtn">Activer mon espace privé</button>
+      </form>
+
       <form id="resetForm" class="authform" hidden novalidate>
         <label>Adresse e-mail<input type="email" id="rsEmail" autocomplete="username" required placeholder="vous@exemple.com"></label>
         <button class="btn solid wide" type="submit" id="rsBtn">Recevoir un lien de réinitialisation</button>
@@ -1532,6 +1543,19 @@ nav.top .wrap{gap:15px;max-width:1260px}
           <span class="formmsg" id="stMsgOut" role="status"></span>
           <button class="btn solid" type="submit" id="stBtn">Enregistrer</button>
         </div>
+      </form>
+    </section>
+
+    <section class="panelx" aria-labelledby="hPw" id="pwPanel">
+      <h2 id="hPw">Mot de passe</h2>
+      <p class="hint">Pour changer le mot de passe de l’espace privé.</p>
+      <form id="pwForm" novalidate>
+        <label>Mot de passe actuel<input type="password" id="pwCur" autocomplete="current-password"></label>
+        <div class="formrow">
+          <label>Nouveau<input type="password" id="pwNew" autocomplete="new-password" minlength="6"></label>
+          <label>Confirmation<input type="password" id="pwNew2" autocomplete="new-password"></label>
+        </div>
+        <div class="formfoot"><span class="formmsg" id="pwMsg" role="status"></span><button class="btn solid" type="submit" id="pwBtn">Changer</button></div>
       </form>
     </section>
 
@@ -2060,7 +2084,7 @@ route();
       if (!r.ok || !(r.headers.get('content-type') || '').includes('json')) return null;
       API_STATUS = await r.json();
     } catch (e) { return null; }
-    if (!API_STATUS.db || !API_STATUS.admin) return null;
+    if (!API_STATUS.db) return null;
     const subs = [];
     async function call(method, url, body, headers = {}) {
       const opt = { method, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch', ...headers } };
@@ -2075,6 +2099,10 @@ route();
     const pub = (p) => (!p ? '' : p.startsWith('static:') ? abs(p.slice(7)) : p.startsWith('file:') ? abs('files/' + p.slice(5)) : abs(p));
     return {
       noReset: true,
+      setupMode: !!API_STATUS.setup,
+      user: API_STATUS.user || '',
+      async setup(code, password) { const s = await call('POST', 'api/setup', { code, password }); this.setupMode = false; subs.forEach((f) => f('SIGNED_IN', s)); },
+      async changePw(current, password) { await call('POST', 'api/password', { current, password }); },
       async session() { try { return await call('GET', 'api/me'); } catch (e) { return null; } },
       onAuth(cb) { subs.push(cb); },
       async signIn(email, password) { const s = await call('POST', 'api/login', { email, password }); subs.forEach((f) => f('SIGNED_IN', s)); },
@@ -2403,9 +2431,10 @@ route();
   /* ---------------- connexion ---------------- */
   function authMsg(text, ok) { const m = $('authMsg'); m.textContent = text || ''; m.hidden = !text; m.classList.toggle('ok', !!ok); }
   function showForm(which) {
-    $('loginForm').hidden = which !== 'login'; $('resetForm').hidden = which !== 'reset'; $('newPwForm').hidden = which !== 'newpw';
-    $('authTitle').textContent = which === 'reset' ? 'Mot de passe oublié' : which === 'newpw' ? 'Nouveau mot de passe' : 'Connexion';
-    $('authSub').textContent = which === 'reset' ? 'Indiquez votre adresse : vous recevrez un lien pour choisir un nouveau mot de passe.'
+    $('loginForm').hidden = which !== 'login'; $('resetForm').hidden = which !== 'reset'; $('newPwForm').hidden = which !== 'newpw'; $('setupForm').hidden = which !== 'setup';
+    $('authTitle').textContent = which === 'reset' ? 'Mot de passe oublié' : which === 'newpw' ? 'Nouveau mot de passe' : which === 'setup' ? 'Activer l’espace privé' : 'Connexion';
+    $('authSub').textContent = which === 'setup' ? 'Première connexion : saisissez le code d’activation qui vous a été transmis, puis choisissez votre mot de passe.'
+      : which === 'reset' ? 'Indiquez votre adresse : vous recevrez un lien pour choisir un nouveau mot de passe.'
       : which === 'newpw' ? 'Choisissez un nouveau mot de passe pour votre espace privé.'
       : 'Réservé à l’autrice du site, pour gérer les documents et les informations de la soutenance.';
   }
@@ -2456,6 +2485,29 @@ route();
     catch (err) { authMsg(errText(err)); }
     busy($('npBtn'), false);
   });
+  $('setupForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); if (!STORE || !STORE.setup) return;
+    const code = $('suCode').value.trim(), pw = $('suPw').value;
+    if (!code) return authMsg('Saisissez le code d’activation.');
+    if (pw.replace(/\s+/g, '').length < 6) return authMsg('Le mot de passe doit contenir au moins 6 caractères.');
+    if (pw !== $('suPw2').value) return authMsg('Les deux mots de passe ne sont pas identiques.');
+    authMsg(''); busy($('suBtn'), true, 'Activation…');
+    try { await STORE.setup(code, pw); $('suPw').value = $('suPw2').value = ''; SESSION = await STORE.session(); updateLock(); toast('Espace privé activé.'); location.hash = '#admin'; }
+    catch (err) { authMsg(errText(err)); }
+    busy($('suBtn'), false);
+  });
+  $('pwForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const out = (t, c) => { $('pwMsg').textContent = t; $('pwMsg').className = 'formmsg ' + (c || ''); };
+    if (!STORE || !STORE.changePw) return out('Indisponible ici.', 'err');
+    const cur = $('pwCur').value, n1 = $('pwNew').value;
+    if (n1.replace(/\s+/g, '').length < 6) return out('Le nouveau mot de passe doit contenir au moins 6 caractères.', 'err');
+    if (n1 !== $('pwNew2').value) return out('Les deux mots de passe ne sont pas identiques.', 'err');
+    busy($('pwBtn'), true, '…');
+    try { await STORE.changePw(cur, n1); $('pwForm').reset(); out('Mot de passe modifié.', 'ok'); toast('Mot de passe modifié.'); }
+    catch (err) { out(errText(err), 'err'); }
+    busy($('pwBtn'), false);
+  });
   $('adLogout').addEventListener('click', async () => {
     if (STORE) await STORE.signOut(); SESSION = null; updateLock(); toast('Vous êtes déconnectée.'); location.hash = '#memoire';
   });
@@ -2470,6 +2522,7 @@ route();
     return '';
   }
   async function renderAdmin() {
+    $('pwPanel').hidden = !(STORE && STORE.changePw);
     $('adWho').textContent = SESSION ? SESSION.email : '';
     try { const s = await STORE.getSettings(); SETTINGS = { ...(CFG.defaultSettings || {}), ...s }; } catch (e) { /* garde les valeurs actuelles */ }
     $('stDate').value = SETTINGS.date || ''; $('stTime').value = SETTINGS.time || ''; $('stPlace').value = SETTINGS.place || ''; $('stMsg').value = SETTINGS.message || '';
@@ -2662,6 +2715,7 @@ route();
         }
         if (!STORE) { showForm('none'); $('authTitle').textContent = 'Espace privé'; return; }
         if (isAdmin()) { location.replace('#admin'); return; }
+        if (STORE.setupMode) { $('suUser').value = STORE.user || 'Aicha'; showForm('setup'); return; }
         if ($('newPwForm').hidden) showForm('login');
       }
       if (v === 'admin') {
