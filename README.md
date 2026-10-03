@@ -9,5 +9,11 @@ Rapport de fin de formation · Licence professionnelle en Assistance administrat
 - **Documents** : le rapport et la présentation, lisibles en ligne, avec codes QR à scanner.
 - **Espace privé** (cadenas) : dépôt et gestion des documents par l’autrice (voir `config.js`).
 
-## Publication
-Site statique publié avec GitHub Pages (branche `main`, dossier racine).
+## Hébergement (Railway)
+- Le site est servi par `server.js` (Node 18+), qui fournit aussi l’API des documents.
+- Base de données : un service **PostgreSQL** dans le même projet Railway.
+- Variables du service du site :
+  - `DATABASE_URL` → référence à la base PostgreSQL (`${{Postgres.DATABASE_URL}}`)
+  - `ADMIN_EMAIL` → adresse de connexion de l’autrice
+  - `ADMIN_PASSWORD` → mot de passe (8 caractères minimum)
+- Sans base de données, le site reste consultable avec les documents du dossier `docs/`.

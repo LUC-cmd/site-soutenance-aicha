@@ -1987,6 +1987,7 @@ route();
     clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 3200);
   }
   function errText(e) {
+    if (e && e.fr) return e.fr;
     const m = (e && (e.message || e.error_description || e.msg)) || String(e || '');
     if (/invalid login credentials/i.test(m)) return 'E-mail ou mot de passe incorrect.';
     if (/email not confirmed/i.test(m)) return 'Adresse e-mail non confirmée : ouvrez d’abord le lien reçu par e-mail.';
@@ -2050,7 +2051,48 @@ route();
     return store;
   }
 
-  const STORE = typeof window.__STORE_MOCK === 'function' ? window.__STORE_MOCK() : makeSupabaseStore();
+  /* ---------------- stockage (serveur du site + PostgreSQL, ex. Railway) ---------------- */
+  let API_STATUS = null; // { db, admin } quand le site est servi par server.js
+  async function makeApiStore() {
+    if (!ONLINE) return null;
+    try {
+      const r = await fetch(abs('api/status'), { cache: 'no-store' });
+      if (!r.ok || !(r.headers.get('content-type') || '').includes('json')) return null;
+      API_STATUS = await r.json();
+    } catch (e) { return null; }
+    if (!API_STATUS.db || !API_STATUS.admin) return null;
+    const subs = [];
+    async function call(method, url, body, headers = {}) {
+      const opt = { method, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch', ...headers } };
+      if (body instanceof Blob) opt.body = body;
+      else if (body !== undefined) { opt.body = JSON.stringify(body); opt.headers['Content-Type'] = 'application/json'; }
+      let r;
+      try { r = await fetch(abs(url), opt); } catch (e) { throw Object.assign(new Error('Failed to fetch'), {}); }
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw Object.assign(new Error(data.error || 'Erreur ' + r.status), { fr: data.error, status: r.status });
+      return data;
+    }
+    const pub = (p) => (!p ? '' : p.startsWith('static:') ? abs(p.slice(7)) : p.startsWith('file:') ? abs('files/' + p.slice(5)) : abs(p));
+    return {
+      noReset: true,
+      async session() { try { return await call('GET', 'api/me'); } catch (e) { return null; } },
+      onAuth(cb) { subs.push(cb); },
+      async signIn(email, password) { const s = await call('POST', 'api/login', { email, password }); subs.forEach((f) => f('SIGNED_IN', s)); },
+      async signOut() { await call('POST', 'api/logout', {}).catch(() => {}); subs.forEach((f) => f('SIGNED_OUT', null)); },
+      async resetPw() {}, async updatePw() {},
+      publicUrl: pub,
+      async listDocs() { return (await call('GET', 'api/documents')).map((d) => ({ ...d, url: pub(d.file_path) })); },
+      async upload(file) { return (await call('POST', 'api/files', file, { 'X-File-Name': encodeURIComponent(file.name), 'Content-Type': file.type || guessMime(file.name) })).path; },
+      async removeFile(p) { if (p && p.startsWith('file:')) await call('DELETE', 'api/files/' + p.slice(5)); },
+      async insertDoc(row) { return call('POST', 'api/documents', row); },
+      async updateDoc(id, patch) { await call('PATCH', 'api/documents/' + id, patch); },
+      async deleteDoc(id) { await call('DELETE', 'api/documents/' + id); },
+      async getSettings() { return call('GET', 'api/settings'); },
+      async saveSettings(st) { await call('PUT', 'api/settings', st); },
+    };
+  }
+
+  let STORE = typeof window.__STORE_MOCK === 'function' ? window.__STORE_MOCK() : null;
   let DOCS = [], SETTINGS = {}, SESSION = null, ADOCS = [];
   const isAdmin = () => !!SESSION && (!CFG.ownerEmail || SESSION.email.toLowerCase() === String(CFG.ownerEmail).toLowerCase());
   const staticDocs = () => (CFG.defaultDocuments || []).map((d, i) => ({ visible: true, position: i, ...d, url: abs(d.url), _static: true }));
@@ -2392,7 +2434,9 @@ route();
     } catch (err) { authMsg(errText(err)); }
     busy($('lgBtn'), false);
   });
-  $('lgForgot').addEventListener('click', () => { authMsg(''); $('rsEmail').value = $('lgEmail').value; showForm('reset'); $('rsEmail').focus(); });
+  $('lgForgot').addEventListener('click', () => {
+    if (STORE && STORE.noReset) { authMsg('Pour changer de mot de passe : sur Railway, ouvrez le service du site → onglet Variables → modifiez ADMIN_PASSWORD. Le site redémarre seul en une minute.', true); return; }
+    authMsg(''); $('rsEmail').value = $('lgEmail').value; showForm('reset'); $('rsEmail').focus(); });
   $('rsBack').addEventListener('click', () => { authMsg(''); showForm('login'); });
   $('resetForm').addEventListener('submit', async (e) => {
     e.preventDefault(); if (!STORE) return;
@@ -2582,6 +2626,7 @@ route();
   /* ---------------- branchement sur le routeur ---------------- */
   let ready = null;
   async function init() {
+    if (!STORE) STORE = (await makeApiStore()) || makeSupabaseStore();
     if (STORE) {
       try { SESSION = await STORE.session(); } catch (e) { SESSION = null; }
       STORE.onAuth((ev, s) => {
@@ -2610,6 +2655,11 @@ route();
       if (v === 'connexion') {
         authMsg('');
         $('authOff').hidden = !!STORE;
+        if (!STORE && API_STATUS) {
+          $('authOff').innerHTML = !API_STATUS.db
+            ? '<p><b>L’espace privé n’est pas encore activé :</b> la base de données n’est pas reliée au site.</p><p>Sur Railway : ajoutez une base <b>PostgreSQL</b> au projet, puis dans le service du site, onglet <b>Variables</b>, ajoutez <code>DATABASE_URL</code> en référence à cette base.</p>'
+            : '<p><b>Dernière étape :</b> le compte administrateur n’est pas configuré.</p><p>Sur Railway, dans le service du site, onglet <b>Variables</b>, ajoutez <code>ADMIN_EMAIL</code> (votre adresse) et <code>ADMIN_PASSWORD</code> (8 caractères minimum).</p>';
+        }
         if (!STORE) { showForm('none'); $('authTitle').textContent = 'Espace privé'; return; }
         if (isAdmin()) { location.replace('#admin'); return; }
         if ($('newPwForm').hidden) showForm('login');
