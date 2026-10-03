@@ -2501,7 +2501,9 @@ route();
     let k = kind(d);
     if (k === 'ppt') {
       const twin = pdfTwin(d);
-      if (twin && (mode === 'present' || !PUBLIC_HOST)) { d = { ...twin, title: d.title, category: d.category, _from: d }; k = 'pdf'; }
+      // en ligne : le vrai PowerPoint (transitions et animations) dans la visionneuse Microsoft ;
+      // hors ligne : sa version PDF du même nom
+      if (twin && !PUBLIC_HOST) { d = { ...twin, title: d.title, category: d.category, _from: d }; k = 'pdf'; }
     }
     viewer.classList.toggle('present', mode === 'present' && k === 'pdf');
     viewer.classList.toggle('isframe', k !== 'pdf');
@@ -2509,7 +2511,7 @@ route();
     $('vwTitle').textContent = d.title; $('vwCat').textContent = d.category || extLabel(d);
     $('vwDl').href = d.url; $('vwDl').setAttribute('download', d.file_name || '');
     $('vwMode').textContent = mode === 'present' ? 'Lecture' : 'Présenter';
-    $('vwMode').hidden = k === 'doc' || (k === 'ppt' && !pdfTwin(d));
+    $('vwMode').hidden = k === 'doc';
     $('vwZoomIn').hidden = $('vwZoomOut').hidden = k !== 'pdf' || mode === 'present';
     $('vwPrev').hidden = $('vwNext').hidden = true;
     $('vwPage').textContent = '';
