@@ -1073,6 +1073,42 @@ nav.top .burger[aria-expanded="true"] span:nth-child(3){top:20px;transform:rotat
 nav.top a.docs .dlbl{font-family:var(--f-display);font-size:14.5px;font-weight:600;letter-spacing:0;text-transform:none}
 @media (max-width:860px){ .authside::before{opacity:.35} }
 
+/* =================== mode présentation =================== */
+.viewer.present{background:#000}
+.viewer.present .vwbar{position:absolute;left:0;right:0;top:0;z-index:5;background:linear-gradient(180deg,rgba(0,0,0,.75),rgba(0,0,0,0));border:0;transition:opacity .35s,transform .35s}
+.viewer.present .vwbody{padding:8px;overflow:hidden;cursor:pointer}
+.viewer.present.idle .vwbar,.viewer.present.idle .vwnav{opacity:0;pointer-events:none}
+.viewer.present.idle .vwbar{transform:translateY(-12px)}
+.viewer.present.idle,.viewer.present.idle *{cursor:none!important}
+.viewer .stage{position:relative;width:100%;height:100%;display:grid;place-items:center}
+.viewer .stage .slide{grid-area:1/1;transition:opacity .35s ease,transform .35s ease;box-shadow:0 30px 80px rgba(0,0,0,.6);border-radius:2px;background:#fff}
+.viewer .stage .slide canvas{display:block;border-radius:2px}
+.viewer .stage .slide.in{opacity:0;transform:scale(.985)}
+.viewer .stage .slide.out{opacity:0}
+.vwprog{display:none}
+.viewer.present .vwprog{display:block;position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.1);z-index:5}
+.vwprog span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--uk-blue,#1B3F9E),var(--uk-green,#00923A) 60%,var(--uk-yellow,#FFC20E));transition:width .4s ease}
+.vwcount{display:none}
+.viewer.present .vwcount{display:block;position:absolute;right:18px;bottom:16px;z-index:5;font-family:var(--f-mono);font-size:13px;color:#fff;background:rgba(0,0,0,.55);padding:5px 10px;border-radius:8px;opacity:0;pointer-events:none}
+.vwcount.show{animation:countfade 2.2s ease}
+@keyframes countfade{0%{opacity:0}10%{opacity:1}75%{opacity:1}100%{opacity:0}}
+.viewer.blank-black .vwbody::after,.viewer.blank-white .vwbody::after{content:"";position:absolute;inset:0;z-index:4}
+.viewer.blank-black .vwbody::after{background:#000}
+.viewer.blank-white .vwbody::after{background:#fff}
+.viewer .vwbody{position:relative}
+.vwhelp{position:absolute;inset:0;z-index:20;background:rgba(5,10,30,.7);backdrop-filter:blur(4px);display:grid;place-items:center;padding:16px}
+.vwhelp[hidden]{display:none}
+.vwhelpcard{background:#fff;color:var(--ink);border-radius:20px;padding:26px 28px;width:min(460px,100%);box-shadow:0 30px 80px rgba(0,0,0,.4);font-family:var(--f-display)}
+.vwhelpcard h3{font-size:20px;margin-bottom:14px}
+.vwhelpcard dl{display:grid;grid-template-columns:auto 1fr;gap:10px 16px;align-items:center;font-size:14.5px}
+.vwhelpcard dt{white-space:nowrap}
+.vwhelpcard dd{margin:0;color:var(--muted)}
+.vwhelpcard p{margin-top:14px;font-size:13.5px;color:var(--muted)}
+kbd{display:inline-block;min-width:26px;text-align:center;font-family:var(--f-mono);font-size:12px;padding:3px 7px;border-radius:7px;border:1px solid #CFD8E8;border-bottom-width:3px;background:#F8FAFD;color:var(--ink)}
+.viewer.isframe .vwbody{padding:0}
+.viewer.present .vwnav{z-index:6}
+@media (max-width:560px){ #vwHelpBtn{display:none} }
+
 </style>
 
 <nav class="top" id="topnav" aria-label="Pages du site">
@@ -1731,11 +1767,30 @@ nav.top a.docs .dlbl{font-family:var(--f-display);font-size:14.5px;font-weight:6
       <button class="vwbtn" id="vwZoomOut" type="button" aria-label="Réduire">−</button>
       <button class="vwbtn" id="vwZoomIn" type="button" aria-label="Agrandir">+</button>
       <button class="vwbtn txt" id="vwMode" type="button">Présenter</button>
+      <button class="vwbtn" id="vwHelpBtn" type="button" aria-label="Raccourcis clavier" title="Raccourcis clavier (?)">?</button>
       <button class="vwbtn" id="vwFull" type="button" aria-label="Plein écran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
       <a class="vwbtn" id="vwDl" aria-label="Télécharger" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M5 20h14"/></svg></a>
     </div>
   </div>
   <div class="vwbody" id="vwBody"></div>
+  <div class="vwprog" aria-hidden="true"><span id="vwBar"></span></div>
+  <div class="vwcount" id="vwCount" aria-live="polite"></div>
+  <div class="vwhelp" id="vwHelp" hidden>
+    <div class="vwhelpcard" role="document">
+      <h3>Raccourcis de présentation</h3>
+      <dl>
+        <dt><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espace</kbd></dt><dd>Diapositive suivante</dd>
+        <dt><kbd>←</kbd> <kbd>↑</kbd></dt><dd>Diapositive précédente</dd>
+        <dt><kbd>Début</kbd> <kbd>Fin</kbd></dt><dd>Première / dernière</dd>
+        <dt><kbd>5</kbd> puis <kbd>Entrée</kbd></dt><dd>Aller à la diapositive 5</dd>
+        <dt><kbd>F</kbd></dt><dd>Plein écran (activer / quitter)</dd>
+        <dt><kbd>B</kbd> / <kbd>W</kbd></dt><dd>Écran noir / blanc (pause)</dd>
+        <dt><kbd>P</kbd></dt><dd>Lancer la présentation depuis la lecture</dd>
+        <dt><kbd>Échap</kbd></dt><dd>Quitter le plein écran, puis fermer</dd>
+      </dl>
+      <p>Une télécommande de présentation (clicker) fonctionne aussi.</p>
+    </div>
+  </div>
   <button class="vwnav prev" id="vwPrev" type="button" aria-label="Page précédente" hidden>‹</button>
   <button class="vwnav next" id="vwNext" type="button" aria-label="Page suivante" hidden>›</button>
 </div>
@@ -2443,12 +2498,18 @@ route();
     const tok = ++V.tok;
     if (viewer.hidden) { lastFocus = document.activeElement; viewer.hidden = false; document.documentElement.style.overflow = 'hidden'; }
     V.doc = d; V.mode = mode; V.zoom = 1;
-    const k = kind(d);
+    let k = kind(d);
+    if (k === 'ppt') {
+      const twin = pdfTwin(d);
+      if (twin && (mode === 'present' || !PUBLIC_HOST)) { d = { ...twin, title: d.title, category: d.category, _from: d }; k = 'pdf'; }
+    }
     viewer.classList.toggle('present', mode === 'present' && k === 'pdf');
+    viewer.classList.toggle('isframe', k !== 'pdf');
+    wake();
     $('vwTitle').textContent = d.title; $('vwCat').textContent = d.category || extLabel(d);
     $('vwDl').href = d.url; $('vwDl').setAttribute('download', d.file_name || '');
     $('vwMode').textContent = mode === 'present' ? 'Lecture' : 'Présenter';
-    $('vwMode').hidden = k === 'doc';
+    $('vwMode').hidden = k === 'doc' || (k === 'ppt' && !pdfTwin(d));
     $('vwZoomIn').hidden = $('vwZoomOut').hidden = k !== 'pdf' || mode === 'present';
     $('vwPrev').hidden = $('vwNext').hidden = true;
     $('vwPage').textContent = '';
@@ -2467,18 +2528,26 @@ route();
           const p1 = await pdf.getPage(1); const vp = p1.getViewport({ scale: 1 }); V.ratio = vp.height / vp.width;
         }
         if (tok !== V.tok) return;
-        if (mode === 'present') { if (mode === 'present') goFull(); renderPresent(tok); } else renderRead(tok);
+        if (mode === 'present') { goFull(); vbody.innerHTML = ''; renderPresent(tok); } else renderRead(tok);
       } catch (e) {
         console.warn(e);
         if (tok === V.tok) fallbackMsg(d, ONLINE ? 'Impossible d’afficher ce document ici.' : 'Le lecteur intégré fonctionne une fois le site en ligne. Vous pouvez ouvrir le fichier directement :');
       }
     } else if (PUBLIC_HOST) {
       vbody.classList.add('frame');
-      vbody.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(abs(d.url))}" title="${esc(d.title)}" allowfullscreen></iframe>`;
+      vbody.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(abs(d.url))}&wdAr=1.7777777777777777" title="${esc(d.title)}" allowfullscreen></iframe>`;
+      const fr = vbody.querySelector('iframe');
+      // le clavier (flèches) est donné à la visionneuse PowerPoint dès qu'elle est chargée
+      fr.addEventListener('load', () => { try { fr.focus(); } catch (e) {} });
       if (mode === 'present') goFull();
     } else {
       fallbackMsg(d, 'La lecture en ligne des fichiers PowerPoint et Word fonctionne une fois le site publié sur internet. En attendant, ouvrez ou téléchargez le fichier :');
     }
+  }
+  const baseName = (n) => String(n || '').replace(/\.[^.]+$/, '').toLowerCase();
+  function pdfTwin(d) {
+    const b = baseName(d.file_name);
+    return DOCS.find((x) => x !== d && kind(x) === 'pdf' && x.visible !== false && baseName(x.file_name) === b) || null;
   }
   function pageWidth() {
     const avail = vbody.clientWidth - 24;
@@ -2513,53 +2582,117 @@ route();
     vbody.querySelectorAll('.pg').forEach((el) => V.io.observe(el));
     vbody.scrollTop = 0;
   }
-  async function renderPresent(tok) {
+  /* ---------- mode présentation : plein écran, flèches, transitions ---------- */
+  const PC = new Map(); // cache des diapositives rendues (page -> canvas)
+  let pcKey = '';
+  function slideSize() { return [vbody.clientWidth - 16, vbody.clientHeight - 16]; }
+  async function slideCanvas(num) {
+    const [W, H] = slideSize(), key = `${V.pdf._url}|${W}x${H}`;
+    if (key !== pcKey) { PC.clear(); pcKey = key; }
+    if (PC.has(num)) return PC.get(num);
+    const pr = (async () => { const cv = document.createElement('canvas'); await drawInto(num, cv, W, H); return cv; })();
+    PC.set(num, pr);
+    pr.catch(() => PC.delete(num));
+    return pr;
+  }
+  function presentChrome() {
     $('vwPrev').hidden = $('vwNext').hidden = false;
     $('vwPage').textContent = `${V.page} / ${V.n}`;
     $('vwPrev').disabled = V.page <= 1; $('vwNext').disabled = V.page >= V.n;
-    const W = vbody.clientWidth - 20, H = vbody.clientHeight - 20;
-    const pg = document.createElement('div'); pg.className = 'pg';
-    const cv = document.createElement('canvas'); pg.appendChild(cv);
-    try { await drawInto(V.page, cv, W, H); } catch (e) { return; }
+    $('vwBar').style.width = (V.n > 1 ? ((V.page - 1) / (V.n - 1)) * 100 : 100) + '%';
+    const c = $('vwCount'); c.textContent = `${V.page} / ${V.n}`; c.classList.remove('show'); void c.offsetWidth; c.classList.add('show');
+  }
+  async function renderPresent(tok) {
+    presentChrome();
+    let cv;
+    try { cv = await slideCanvas(V.page); } catch (e) { return; }
     if (tok !== V.tok) return;
-    vbody.innerHTML = ''; vbody.appendChild(pg);
+    let stage = vbody.querySelector('.stage');
+    if (!stage) { vbody.innerHTML = '<div class="stage"></div>'; stage = vbody.querySelector('.stage'); }
+    const pg = document.createElement('div'); pg.className = 'pg slide in';
+    pg.appendChild(cv.cloneNode ? copyCanvas(cv) : cv);
+    stage.querySelectorAll('.slide').forEach((o) => { o.classList.add('out'); setTimeout(() => o.remove(), 380); });
+    stage.appendChild(pg);
+    requestAnimationFrame(() => pg.classList.remove('in'));
+    // préchargement des voisines pour un passage instantané
+    [V.page + 1, V.page - 1, V.page + 2].forEach((n) => { if (n >= 1 && n <= V.n) slideCanvas(n).catch(() => {}); });
+  }
+  function copyCanvas(src) {
+    const c = document.createElement('canvas'); c.width = src.width; c.height = src.height;
+    c.style.width = src.style.width; c.style.height = src.style.height;
+    c.getContext('2d').drawImage(src, 0, 0); return c;
   }
   function go(delta) {
     if (V.mode !== 'present' || !V.pdf) return;
-    const p = Math.min(V.n, Math.max(1, V.page + delta));
-    if (p === V.page) return;
-    V.page = p; renderPresent(++V.tok);
+    goTo(V.page + delta);
   }
+  function goTo(p) {
+    p = Math.min(V.n, Math.max(1, p));
+    if (p === V.page && vbody.querySelector('.slide')) return;
+    V.page = p; setBlank(null); renderPresent(++V.tok);
+  }
+  function setBlank(color) {
+    viewer.classList.remove('blank-black', 'blank-white');
+    if (color) viewer.classList.add('blank-' + color);
+  }
+  // barre d'outils et curseur masqués après 2,5 s d'inactivité en présentation
+  let idleT;
+  function wake() {
+    viewer.classList.remove('idle');
+    clearTimeout(idleT);
+    if (V.mode === 'present') idleT = setTimeout(() => viewer.classList.add('idle'), 2500);
+  }
+  viewer.addEventListener('mousemove', wake);
+  viewer.addEventListener('touchstart', wake, { passive: true });
   function goFull() {
     const el = viewer;
     if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (!document.fullscreenElement && el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   }
   function closeViewer() {
     V.tok++; if (V.io) { V.io.disconnect(); V.io = null; }
     viewer.hidden = true; vbody.innerHTML = ''; document.documentElement.style.overflow = '';
+    viewer.classList.remove('present', 'idle', 'blank-black', 'blank-white'); $('vwHelp').hidden = true;
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   $('vwClose').addEventListener('click', () => { location.hash = '#documents'; });
-  $('vwPrev').addEventListener('click', () => go(-1));
-  $('vwNext').addEventListener('click', () => go(1));
+  $('vwPrev').addEventListener('click', (e) => { e.stopPropagation(); go(-1); });
+  $('vwNext').addEventListener('click', (e) => { e.stopPropagation(); go(1); });
   $('vwZoomIn').addEventListener('click', () => { V.zoom = Math.min(2.5, V.zoom + 0.25); renderRead(++V.tok); });
   $('vwZoomOut').addEventListener('click', () => { V.zoom = Math.max(0.5, V.zoom - 0.25); renderRead(++V.tok); });
   $('vwFull').addEventListener('click', () => { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else goFull(); });
+  $('vwHelpBtn').addEventListener('click', () => { $('vwHelp').hidden = !$('vwHelp').hidden; });
+  $('vwHelp').addEventListener('click', () => { $('vwHelp').hidden = true; });
   $('vwMode').addEventListener('click', () => {
     if (!V.doc) return;
+    if (V.mode !== 'present') goFull(); // le plein écran doit partir du clic
     location.hash = '#documents/' + encodeURIComponent(V.doc.id) + (V.mode === 'present' ? '' : '/presenter');
   });
+  let jump = '', jumpT;
   document.addEventListener('keydown', (e) => {
     if (!$('qrPop').hidden && e.key === 'Escape') { $('qrPop').hidden = true; return; }
-    if (viewer.hidden) return;
-    if (e.key === 'Escape' && !document.fullscreenElement) { location.hash = '#documents'; return; }
-    if (V.mode === 'present') {
-      if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); go(1); }
-      if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(-1); }
-      if (e.key === 'Home') { V.page = 2; go(-1); }
-      if (e.key === 'End') { V.page = V.n - 1; go(1); }
+    if (viewer.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) return;
+    const k = e.key;
+    if (k === 'Escape') {
+      if (!$('vwHelp').hidden) { $('vwHelp').hidden = true; return; }
+      if (viewer.classList.contains('blank-black') || viewer.classList.contains('blank-white')) { setBlank(null); return; }
+      if (!document.fullscreenElement) location.hash = '#documents';
+      return;
     }
+    if (k === 'f' || k === 'F') { e.preventDefault(); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else goFull(); return; }
+    if (k === '?' || k === 'h' || k === 'H') { $('vwHelp').hidden = !$('vwHelp').hidden; return; }
+    if (V.mode !== 'present') { if ((k === 'p' || k === 'P') && V.doc && kind(V.doc) !== 'doc') { goFull(); location.hash = '#documents/' + encodeURIComponent(V.doc.id) + '/presenter'; } return; }
+    wake();
+    if (/^[0-9]$/.test(k)) { jump += k; clearTimeout(jumpT); jumpT = setTimeout(() => (jump = ''), 1500); return; }
+    if (k === 'Enter' && jump) { e.preventDefault(); goTo(parseInt(jump, 10)); jump = ''; return; }
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter', 'n', 'N'].includes(k)) { e.preventDefault(); go(1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace', 'p', 'P'].includes(k)) { e.preventDefault(); go(-1); }
+    else if (k === 'Home') { e.preventDefault(); goTo(1); }
+    else if (k === 'End') { e.preventDefault(); goTo(V.n); }
+    else if (k === 'b' || k === 'B' || k === '.') { setBlank(viewer.classList.contains('blank-black') ? null : 'black'); }
+    else if (k === 'w' || k === 'W' || k === ',') { setBlank(viewer.classList.contains('blank-white') ? null : 'white'); }
   });
   let tx = null;
   vbody.addEventListener('touchstart', (e) => { tx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
@@ -2570,8 +2703,9 @@ route();
   }, { passive: true });
   vbody.addEventListener('click', (e) => {
     if (V.mode !== 'present' || e.target.closest('.vwmsg')) return;
+    if (viewer.classList.contains('blank-black') || viewer.classList.contains('blank-white')) { setBlank(null); return; }
     const r = vbody.getBoundingClientRect();
-    go(e.clientX - r.left > r.width / 2 ? 1 : -1);
+    go(e.clientX - r.left > r.width / 3 ? 1 : -1);
   });
   let rz; window.addEventListener('resize', () => {
     clearTimeout(rz); rz = setTimeout(() => {
