@@ -1,0 +1,8 @@
+{
+  "name": "site-soutenance-aicha",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site de soutenance - Gestion du courrier administratif, Mairie de Doumassessé",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
