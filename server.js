@@ -5,8 +5,8 @@
    - données dans PostgreSQL (variable DATABASE_URL fournie par Railway)
    Variables Railway à définir :
      DATABASE_URL    -> référence à la base PostgreSQL du projet
-     ADMIN_EMAIL     -> adresse de connexion de l'autrice
-     ADMIN_PASSWORD  -> mot de passe de connexion (8 caractères minimum)
+     ADMIN_USER      -> identifiant de connexion (ex. Aicha), ou ADMIN_EMAIL
+     ADMIN_PASSWORD  -> mot de passe (6 caractères minimum, espaces ignorés)
    ===================================================================== */
 'use strict';
 const http = require('http');
@@ -17,8 +17,11 @@ const crypto = require('crypto');
 const ROOT = __dirname;
 const PORT = process.env.PORT || 3000;
 const MAX_UPLOAD = 50 * 1024 * 1024;
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+// identifiant de connexion : ADMIN_USER (ex. « Aicha ») ou, à défaut, ADMIN_EMAIL
+const ADMIN_EMAIL = (process.env.ADMIN_USER || process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+// les espaces sont ignorés : « 90 60 41 60 » = « 90604160 »
+const normPw = (s) => String(s || '').replace(/\s+/g, '');
+const ADMIN_PASSWORD = normPw(process.env.ADMIN_PASSWORD);
 const SESSION_DAYS = 7;
 
 /* ---------------- base de données ---------------- */
@@ -59,7 +62,7 @@ async function initDb() {
   dbReady = true;
   console.log('Base de données prête.');
 }
-const adminConfigured = () => !!(ADMIN_EMAIL && ADMIN_PASSWORD.length >= 8);
+const adminConfigured = () => !!(ADMIN_EMAIL && ADMIN_PASSWORD.length >= 6);
 
 /* ---------------- sessions (jeton signé dans un cookie) ---------------- */
 const b64 = (s) => Buffer.from(s).toString('base64url');
@@ -128,12 +131,12 @@ async function api(req, res, p) {
   }
 
   if (p === '/api/login' && m === 'POST') {
-    if (!adminConfigured()) return fail(res, 503, 'Compte administrateur non configuré : ajoutez ADMIN_EMAIL et ADMIN_PASSWORD dans Railway.');
+    if (!adminConfigured()) return fail(res, 503, 'Compte administrateur non configuré : ajoutez ADMIN_USER et ADMIN_PASSWORD dans Railway.');
     const ip = clientIp(req);
     if (tooMany(ip)) return fail(res, 429, 'Trop de tentatives. Patientez quelques minutes puis réessayez.');
     const { email, password } = await readJson(req);
-    const ok = sameText(String(email || '').trim().toLowerCase(), ADMIN_EMAIL) & sameText(String(password || ''), ADMIN_PASSWORD);
-    if (!ok) { attempts.get(ip).push(Date.now()); return fail(res, 401, 'E-mail ou mot de passe incorrect.'); }
+    const ok = sameText(String(email || '').trim().toLowerCase(), ADMIN_EMAIL) & sameText(normPw(password), ADMIN_PASSWORD);
+    if (!ok) { attempts.get(ip).push(Date.now()); return fail(res, 401, 'Identifiant ou mot de passe incorrect.'); }
     attempts.delete(ip);
     setSession(req, res, sign({ email: ADMIN_EMAIL, exp: Date.now() + SESSION_DAYS * 864e5 }), SESSION_DAYS * 86400);
     return send(res, 200, { email: ADMIN_EMAIL });

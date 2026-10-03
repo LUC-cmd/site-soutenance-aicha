@@ -1448,7 +1448,7 @@ nav.top .wrap{gap:15px;max-width:1260px}
       <div class="authmsg" id="authMsg" role="alert" hidden></div>
 
       <form id="loginForm" class="authform" autocomplete="on" novalidate>
-        <label>Adresse e-mail<input type="email" id="lgEmail" autocomplete="username" required placeholder="vous@exemple.com"></label>
+        <label>Identifiant<input type="text" id="lgEmail" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Votre identifiant"></label>
         <label>Mot de passe
           <span class="pwfield"><input type="password" id="lgPw" autocomplete="current-password" required minlength="6" placeholder="••••••••">
           <button type="button" class="pwtoggle" data-for="lgPw" aria-label="Afficher le mot de passe">Afficher</button></span>
@@ -1989,7 +1989,7 @@ route();
   function errText(e) {
     if (e && e.fr) return e.fr;
     const m = (e && (e.message || e.error_description || e.msg)) || String(e || '');
-    if (/invalid login credentials/i.test(m)) return 'E-mail ou mot de passe incorrect.';
+    if (/invalid login credentials/i.test(m)) return 'Identifiant ou mot de passe incorrect.';
     if (/email not confirmed/i.test(m)) return 'Adresse e-mail non confirmée : ouvrez d’abord le lien reçu par e-mail.';
     if (/rate limit|too many/i.test(m)) return 'Trop de tentatives. Patientez quelques minutes puis réessayez.';
     if (/failed to fetch|network|load failed/i.test(m)) return 'Connexion impossible : vérifiez votre accès à internet.';
@@ -2423,8 +2423,8 @@ route();
   $('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault(); if (!STORE) return;
     const email = $('lgEmail').value.trim(), pw = $('lgPw').value;
-    if (!validEmail(email)) return authMsg('Saisissez une adresse e-mail valide.');
-    if (pw.length < 6) return authMsg('Saisissez votre mot de passe.');
+    if (!email) return authMsg('Saisissez votre identifiant.');
+    if (!pw.trim()) return authMsg('Saisissez votre mot de passe.');
     authMsg(''); busy($('lgBtn'), true, 'Connexion…');
     try {
       await STORE.signIn(email, pw);
@@ -2658,7 +2658,7 @@ route();
         if (!STORE && API_STATUS) {
           $('authOff').innerHTML = !API_STATUS.db
             ? '<p><b>L’espace privé n’est pas encore activé :</b> la base de données n’est pas reliée au site.</p><p>Sur Railway : ajoutez une base <b>PostgreSQL</b> au projet, puis dans le service du site, onglet <b>Variables</b>, ajoutez <code>DATABASE_URL</code> en référence à cette base.</p>'
-            : '<p><b>Dernière étape :</b> le compte administrateur n’est pas configuré.</p><p>Sur Railway, dans le service du site, onglet <b>Variables</b>, ajoutez <code>ADMIN_EMAIL</code> (votre adresse) et <code>ADMIN_PASSWORD</code> (8 caractères minimum).</p>';
+            : '<p><b>Dernière étape :</b> le compte administrateur n’est pas configuré.</p><p>Sur Railway, dans le service du site, onglet <b>Variables</b>, ajoutez <code>ADMIN_USER</code> (votre identifiant) et <code>ADMIN_PASSWORD</code> (votre mot de passe).</p>';
         }
         if (!STORE) { showForm('none'); $('authTitle').textContent = 'Espace privé'; return; }
         if (isAdmin()) { location.replace('#admin'); return; }
