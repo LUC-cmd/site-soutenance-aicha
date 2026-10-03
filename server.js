@@ -70,6 +70,26 @@ async function initDb() {
       const again = await pool.query(`select value from app_kv where key='session_secret'`); SECRET = again.rows[0].value;
     }
   }
+  // les trois documents de départ sont publiés automatiquement une seule fois ;
+  // l'autrice peut ensuite les remplacer, les masquer ou les supprimer
+  const seeded = await pool.query(`select 1 from app_kv where key='seeded'`);
+  if (!seeded.rows.length) {
+    const count = await pool.query('select count(*)::int as n from documents');
+    if (!count.rows[0].n) {
+      const size = (f) => { try { return fs.statSync(path.join(ROOT, 'docs', f)).size; } catch { return null; } };
+      const DEFAULTS = [
+        ['Rapport de fin de formation', 'Rapport', 'Analyse du système de gestion du courrier administratif dans une collectivité locale : cas de la Mairie de Doumassessé (Commune du Golfe 3).', 'Rapport_TCHAKONDO_Aicha.pdf', 'application/pdf'],
+        ['Présentation de soutenance', 'Présentation', 'Les diapositives présentées devant le jury, lisibles sur téléphone. Bouton « Présenter » pour l’afficher en plein écran.', 'Presentation_soutenance_TCHAKONDO_Aicha.pdf', 'application/pdf'],
+        ['Présentation (fichier PowerPoint)', 'Présentation', 'Le fichier PowerPoint original, avec ses animations, à ouvrir dans PowerPoint.', 'Presentation_soutenance_TCHAKONDO_Aicha.pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+      ];
+      for (const [i, [title, cat, desc, file, mime]] of DEFAULTS.entries()) {
+        await pool.query(`insert into documents(title,description,category,file_path,file_name,mime,size_bytes,visible,position) values($1,$2,$3,$4,$5,$6,$7,true,$8)`,
+          [title, desc, cat, 'static:docs/' + file, file, mime, size(file), i]);
+      }
+      console.log('Documents de départ publiés.');
+    }
+    await pool.query(`insert into app_kv(key,value) values('seeded','1') on conflict (key) do nothing`);
+  }
   if (process.env.RESET_PASSWORD === '1') { await pool.query(`delete from app_kv where key='admin_pw'`); console.log('Mot de passe effacé (RESET_PASSWORD=1). Retirez cette variable après usage.'); }
   const pw = await pool.query(`select value from app_kv where key='admin_pw'`);
   PW_HASH = pw.rows.length ? pw.rows[0].value : null;
