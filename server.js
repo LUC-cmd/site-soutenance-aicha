@@ -214,6 +214,10 @@ async function api(req, res, p) {
   // ---- tout ce qui suit est réservé à l'administratrice ----
   if (!admin) return fail(res, 401, 'Action refusée : connectez-vous d’abord.');
 
+  if (p === '/api/training' && m === 'GET') {
+    try { return send(res, 200, JSON.parse(fs.readFileSync(path.join(ROOT, 'private', 'training.json'), 'utf8'))); }
+    catch (e) { return fail(res, 404, 'Contenu d’entraînement introuvable.'); }
+  }
   if (p === '/api/password' && m === 'POST') {
     if (ADMIN_PASSWORD) return fail(res, 409, 'Le mot de passe est fixé dans Railway (variable ADMIN_PASSWORD) : modifiez-le là-bas.');
     const { current, password } = await readJson(req);
@@ -318,16 +322,22 @@ const TYPES = {
   '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 };
 const HIDDEN = new Set(['server.js', 'package.json', 'package-lock.json', 'README.md', '_headers', 'railway.json']);
-function serveStatic(req, res, p) {
+// fichiers d'entraînement (exposé, anciennes versions) : réservés à l'autrice connectée
+function servePrivate(req, res, name) {
+  if (!currentAdmin(req)) { res.writeHead(401, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('Connexion requise'); }
+  if (!/^[\w.\-]+$/.test(name)) { res.writeHead(404); return res.end(); }
+  return serveStatic(req, res, '/private/' + name, true);
+}
+function serveStatic(req, res, p, allowPrivate) {
   if (p.endsWith('/')) p += 'index.html';
   const file = path.normalize(path.join(ROOT, p));
   const rel = path.relative(ROOT, file);
-  if (rel.startsWith('..') || rel.split(path.sep).some((s) => s.startsWith('.') || s === 'node_modules') || HIDDEN.has(rel)) { res.writeHead(404); return res.end('Introuvable'); }
+  if (rel.startsWith('..') || rel.split(path.sep).some((s) => s.startsWith('.') || s === 'node_modules' || (s === 'private' && !allowPrivate)) || HIDDEN.has(rel)) { res.writeHead(404); return res.end('Introuvable'); }
   fs.stat(file, (err, st) => {
     if (err || !st.isFile()) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('Page introuvable'); }
     const type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream';
     const base = { 'Content-Type': type, 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'Accept-Ranges': 'bytes',
-      'Cache-Control': rel === 'index.html' || rel === 'config.js' ? 'no-cache' : 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' };
+      'Cache-Control': allowPrivate ? 'private, no-store' : rel === 'index.html' || rel === 'config.js' ? 'no-cache' : 'public, max-age=86400', ...(allowPrivate ? {} : { 'Access-Control-Allow-Origin': '*' }) };
     const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
     if (range && st.size) {
       let start = range[1] === '' ? st.size - Number(range[2]) : Number(range[1]);
@@ -349,6 +359,8 @@ http.createServer(async (req, res) => {
   try { p = decodeURIComponent(new URL(req.url, 'http://x').pathname); } catch { res.writeHead(400); return res.end(); }
   try {
     if (p.startsWith('/api/')) return await api(req, res, p);
+    const pm = p.match(/^\/private\/([^/]+)$/);
+    if (pm) return servePrivate(req, res, pm[1]);
     const fm = p.match(/^\/files\/([^/]+)/);
     if (fm) return await serveFile(req, res, fm[1]);
     if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); return res.end(); }

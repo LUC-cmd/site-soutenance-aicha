@@ -1109,6 +1109,84 @@ kbd{display:inline-block;min-width:26px;text-align:center;font-family:var(--f-mo
 .viewer.present .vwnav{z-index:6}
 @media (max-width:560px){ #vwHelpBtn{display:none} }
 
+/* =================== entraînement =================== */
+.trtabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:18px 0 22px}
+.trtabs button{font-family:var(--f-display);font-size:15px;font-weight:600;color:var(--muted);background:none;border:0;padding:12px 16px;border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer}
+.trtabs button[aria-selected="true"]{color:var(--uk-blue,#1B3F9E);border-bottom-color:var(--uk-green,#00923A)}
+.trpane[hidden]{display:none}
+.tmtop{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:14px;align-items:stretch}
+.tmclock,.tmstatus{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 18px;display:flex;flex-direction:column;gap:2px;font-family:var(--f-display)}
+.tmclock b,.tmstatus b{font-family:var(--f-mono);font-size:40px;font-weight:600;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+.tmlbl{font-size:12.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.tmof{font-size:14px;color:var(--muted)}
+.tmclock.part b.warn{color:#B26A00}.tmclock.part b.over{color:#B42318}
+.tmstatus[data-s="ok"]{border-color:#BFE6CC;background:var(--ok-soft)}
+.tmstatus[data-s="ok"] b{color:var(--ok)}
+.tmstatus[data-s="warn"]{border-color:#F3D9A6;background:var(--warn-soft)}
+.tmstatus[data-s="warn"] b{color:#B26A00}
+.tmstatus[data-s="late"]{border-color:#F5C2BE;background:#FDECEC}
+.tmstatus[data-s="late"] b{color:#B42318}
+.tmbtns{display:flex;flex-direction:column;gap:8px;justify-content:center}
+.tmbtns .btn{font-family:var(--f-display);border-radius:12px;font-size:15px;padding:10px 16px;white-space:nowrap}
+.tmbtns .btn.solid{background:var(--uk-blue,#1B3F9E);border-color:var(--uk-blue,#1B3F9E);color:#fff}
+.tmline{display:flex;height:14px;border-radius:8px;overflow:hidden;margin:18px 0 8px;background:#EEF1F6;position:relative}
+.tmline span{position:relative;height:100%;border-right:2px solid #fff;background:#E1E6F0}
+.tmline span i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--uk-blue,#1B3F9E);transition:width .25s linear}
+.tmline span.done i{background:var(--uk-green,#00923A)}
+.tmline span.over i{background:#D04A3B}
+.tmline .now{position:absolute;top:-3px;bottom:-3px;width:3px;border-radius:2px;background:var(--ink);transition:left .25s linear}
+.tmkeys{font-family:var(--f-display);font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tmopt{display:inline-flex;gap:6px;align-items:center;margin-left:10px}
+.tmgrid{display:grid;grid-template-columns:340px 1fr;gap:20px;margin-top:16px;align-items:start}
+.tmlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;position:sticky;top:90px}
+.tmlist li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font-family:var(--f-display);cursor:pointer;transition:border-color .15s,background .15s}
+.tmlist li:hover{border-color:#C3CDE0}
+.tmlist li b{font-size:14.5px}
+.tmlist li .w{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.tmlist li .d{font-family:var(--f-mono);font-size:12.5px;text-align:right}
+.tmlist li .s{font-size:12px;color:var(--muted)}
+.tmlist li.cur{border-color:var(--uk-blue,#1B3F9E);background:var(--stamp-soft);box-shadow:0 0 0 3px rgba(27,63,158,.08)}
+.tmlist li.done{opacity:.8}
+.tmlist li .d.ok{color:var(--ok)}.tmlist li .d.warn{color:#B26A00}.tmlist li .d.late{color:#B42318}
+.prompter{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 26px;min-height:420px}
+.prhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+.prhead h2{font-family:var(--f-display);font-size:24px;margin-top:2px}
+.prslides{font-family:var(--f-mono);font-size:12.5px;color:var(--uk-green,#00923A);font-weight:600}
+.prsize{display:flex;gap:6px}
+.prsize button{font-family:var(--f-display);font-weight:700;border:1px solid var(--line);background:#fff;border-radius:9px;width:40px;height:36px;cursor:pointer}
+.prbody{--fs:19px;font-size:var(--fs);line-height:1.65;color:var(--ink)}
+.prbody p{margin:0 0 .85em}
+.prbody p.tr{background:#E8F1EB;border-left:4px solid #1F5E3B;padding:.5em .8em;border-radius:6px}
+.prbody p.dir{font-style:italic;color:var(--muted);font-size:.85em}
+.tmresult{margin-top:22px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+.tmresult h3,.tmhist h3{font-family:var(--f-display);font-size:19px;margin-bottom:10px}
+.tmresult table{width:100%;border-collapse:collapse;font-family:var(--f-display);font-size:14.5px}
+.tmresult th,.tmresult td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+.tmresult td.n{font-family:var(--f-mono);text-align:right}
+.tmresult .ok{color:var(--ok)}.tmresult .warn{color:#B26A00}.tmresult .late{color:#B42318}
+.tmhist{margin-top:18px;font-family:var(--f-display);font-size:14px;color:var(--muted)}
+.tmhist ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}
+.decklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-bottom:30px}
+.deckcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--uk-blue,#1B3F9E)}
+.deckcard h3{font-family:var(--f-display);font-size:19px}
+.deckcard p{color:var(--muted);font-size:14.5px}
+.deckcard .docbtns{margin-top:auto;padding-top:8px}
+.dtag{align-self:flex-start;font-family:var(--f-mono);font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:#EEF0F5;color:var(--muted)}
+.dtag.cur{background:var(--ok-soft);color:var(--ok)}
+@media (max-width:980px){
+  .tmtop{grid-template-columns:1fr 1fr}
+  .tmbtns{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}
+  .tmgrid{grid-template-columns:1fr}
+  .tmlist{position:static;flex-direction:row;overflow-x:auto;padding-bottom:6px}
+  .tmlist li{min-width:200px}
+}
+@media (max-width:560px){
+  .tmtop{grid-template-columns:1fr}
+  .tmclock b,.tmstatus b{font-size:32px}
+  .prompter{padding:16px}
+  .prbody{--fs:17px}
+}
+
 </style>
 
 <nav class="top" id="topnav" aria-label="Pages du site">
@@ -1688,6 +1766,7 @@ kbd{display:inline-block;min-width:26px;text-align:center;font-family:var(--f-mo
       <p class="lede">Connectée en tant que <b id="adWho">—</b></p>
     </div>
     <div class="adminactions">
+      <a class="btn solid" href="#entrainement">Entraînement</a>
       <a class="btn" href="#documents">Voir la page publique</a>
       <button class="btn" type="button" id="adLogout">Se déconnecter</button>
     </div>
@@ -1811,6 +1890,96 @@ kbd{display:inline-block;min-width:26px;text-align:center;font-family:var(--f-mo
 
 <div class="toast" id="toast" role="status" hidden></div>
 
+<!-- ======================= VUE : ENTRAÎNEMENT (espace privé) ======================= -->
+<div class="view" id="v-entrainement" hidden>
+  <header class="wrap adminhead">
+    <div>
+      <span class="eyebrow">Espace privé</span>
+      <h1>Entraînement</h1>
+      <p class="lede">Répétez l’exposé avec le chronomètre et retrouvez toutes les versions de la présentation.</p>
+    </div>
+    <div class="adminactions">
+      <a class="btn" href="#admin">Tableau de bord</a>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="trtabs" role="tablist">
+      <button role="tab" id="trTab-timer" aria-selected="true" aria-controls="trPane-timer">Exposé chronométré</button>
+      <button role="tab" id="trTab-decks" aria-selected="false" aria-controls="trPane-decks">Présentations</button>
+      <button role="tab" id="trTab-texts" aria-selected="false" aria-controls="trPane-texts">Textes de l’exposé</button>
+    </div>
+
+    <!-- ---------- chronomètre ---------- -->
+    <section class="trpane" id="trPane-timer" role="tabpanel">
+      <div class="tmtop">
+        <div class="tmclock">
+          <span class="tmlbl">Temps écoulé</span>
+          <b id="tmClock">00:00</b>
+          <span class="tmof">sur <span id="tmTotal">15:30</span></span>
+        </div>
+        <div class="tmclock part">
+          <span class="tmlbl">Reste pour cette partie</span>
+          <b id="tmLeft">—</b>
+          <span class="tmof" id="tmPartName">Appuyez sur Démarrer</span>
+        </div>
+        <div class="tmstatus" id="tmStatus" data-s="idle">
+          <span class="tmlbl">Fin prévue</span>
+          <b id="tmEta">—</b>
+          <span class="tmof" id="tmDrift">au rythme prévu</span>
+        </div>
+        <div class="tmbtns">
+          <button class="btn solid" id="tmStart" type="button">▶ Démarrer</button>
+          <button class="btn" id="tmNext" type="button" disabled>Partie suivante →</button>
+          <button class="btn" id="tmPrev" type="button" disabled>← Revenir</button>
+          <button class="btn" id="tmReset" type="button">↺ Recommencer</button>
+        </div>
+      </div>
+      <div class="tmline" id="tmLine" aria-hidden="true"></div>
+      <p class="tmkeys">Clavier : <kbd>Espace</kbd> démarrer / pause · <kbd>→</kbd> partie suivante · <kbd>←</kbd> revenir ·
+        <label class="tmopt"><input type="checkbox" id="tmSound" checked> signal sonore à la fin de chaque partie</label></p>
+
+      <div class="tmgrid">
+        <ol class="tmlist" id="tmList"></ol>
+        <article class="prompter" id="prompter">
+          <div class="prhead">
+            <div><span class="prslides" id="prSlides"></span><h2 id="prTitle">—</h2></div>
+            <div class="prsize"><button type="button" id="prSmaller" aria-label="Texte plus petit">A−</button><button type="button" id="prBigger" aria-label="Texte plus grand">A+</button></div>
+          </div>
+          <div class="prbody" id="prBody"></div>
+        </article>
+      </div>
+
+      <div class="tmresult" id="tmResult" hidden></div>
+      <div class="tmhist" id="tmHist"></div>
+    </section>
+
+    <!-- ---------- versions de la présentation ---------- -->
+    <section class="trpane" id="trPane-decks" role="tabpanel" hidden>
+      <p class="hint">Toutes les versions sont conservées. « Présenter » ouvre la version PDF en plein écran (flèches du clavier) ; le fichier PowerPoint garde les animations.</p>
+      <div class="decklist" id="deckList"></div>
+    </section>
+
+    <!-- ---------- textes ---------- -->
+    <section class="trpane" id="trPane-texts" role="tabpanel" hidden>
+      <div class="decklist">
+        <article class="deckcard">
+          <span class="dtag cur">À jour</span>
+          <h3>Texte de l’exposé — version corrigée</h3>
+          <p>Titre exact, plan en six parties, accords et transitions revus, indications de diapositives.</p>
+          <div class="docbtns"><a class="btn solid" href="private/Expose_oral_corrige.docx" download>Télécharger (Word)</a></div>
+        </article>
+        <article class="deckcard">
+          <span class="dtag">Ancienne version</span>
+          <h3>Texte de l’exposé — version d’origine</h3>
+          <p>Le texte tel qu’il a été transmis, avant corrections.</p>
+          <div class="docbtns"><a class="btn" href="private/Expose_oral_original.docx" download>Télécharger (Word)</a></div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+
 <footer>
   <div class="wrap">
     <span>TCHAKONDO Aïcha · Licence professionnelle en Assistance administrative, spécialité Assistant Manager</span>
@@ -1918,7 +2087,7 @@ function countUp(){
 }
 
 /* ================= routeur ================= */
-const VIEWS=['memoire','carte','problemes','ged','demo','population','plan','documents','connexion','admin'];
+const VIEWS=['memoire','carte','problemes','ged','demo','population','plan','documents','connexion','admin','entrainement'];
 function route(){
   const parts=(location.hash||'').slice(1).split('/'); let v=parts[0]; const sub=parts.slice(1).join('/');
   if(!VIEWS.includes(v)) v='memoire';
@@ -2658,7 +2827,7 @@ route();
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
-  $('vwClose').addEventListener('click', () => { location.hash = '#documents'; });
+  $('vwClose').addEventListener('click', () => { if (V.doc && V.doc._private) closeViewer(); else location.hash = '#documents'; });
   $('vwPrev').addEventListener('click', (e) => { e.stopPropagation(); go(-1); });
   $('vwNext').addEventListener('click', (e) => { e.stopPropagation(); go(1); });
   $('vwZoomIn').addEventListener('click', () => { V.zoom = Math.min(2.5, V.zoom + 0.25); renderRead(++V.tok); });
@@ -2669,6 +2838,7 @@ route();
   $('vwMode').addEventListener('click', () => {
     if (!V.doc) return;
     if (V.mode !== 'present') goFull(); // le plein écran doit partir du clic
+    if (V.doc._private) { showDoc(V.doc, V.mode === 'present' ? 'read' : 'present'); return; }
     location.hash = '#documents/' + encodeURIComponent(V.doc.id) + (V.mode === 'present' ? '' : '/presenter');
   });
   let jump = '', jumpT;
@@ -2680,12 +2850,12 @@ route();
     if (k === 'Escape') {
       if (!$('vwHelp').hidden) { $('vwHelp').hidden = true; return; }
       if (viewer.classList.contains('blank-black') || viewer.classList.contains('blank-white')) { setBlank(null); return; }
-      if (!document.fullscreenElement) location.hash = '#documents';
+      if (!document.fullscreenElement) { if (V.doc && V.doc._private) closeViewer(); else location.hash = '#documents'; }
       return;
     }
     if (k === 'f' || k === 'F') { e.preventDefault(); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else goFull(); return; }
     if (k === '?' || k === 'h' || k === 'H') { $('vwHelp').hidden = !$('vwHelp').hidden; return; }
-    if (V.mode !== 'present') { if ((k === 'p' || k === 'P') && V.doc && kind(V.doc) !== 'doc') { goFull(); location.hash = '#documents/' + encodeURIComponent(V.doc.id) + '/presenter'; } return; }
+    if (V.mode !== 'present') { if ((k === 'p' || k === 'P') && V.doc && kind(V.doc) !== 'doc') { goFull(); if (V.doc._private) showDoc(V.doc, 'present'); else location.hash = '#documents/' + encodeURIComponent(V.doc.id) + '/presenter'; } return; }
     wake();
     if (/^[0-9]$/.test(k)) { jump += k; clearTimeout(jumpT); jumpT = setTimeout(() => (jump = ''), 1500); return; }
     if (k === 'Enter' && jump) { e.preventDefault(); goTo(parseInt(jump, 10)); jump = ''; return; }
@@ -2964,6 +3134,192 @@ route();
     busy($('stBtn'), false);
   });
 
+
+  /* ---------------- entraînement : exposé chronométré + versions ---------------- */
+  const TR = { data: null, loaded: false, run: null, size: 19 };
+  const fmt = (sec) => { const neg = sec < 0; sec = Math.abs(Math.round(sec)); const m = Math.floor(sec / 60), s = sec % 60; return (neg ? '−' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); };
+  const cls = (d) => (d > 30 ? 'late' : d > 10 ? 'warn' : d < -45 ? 'warn' : 'ok');
+  const fmtD = (sec) => (sec >= 0 ? '+' : '−') + fmt(Math.abs(sec)).replace(/^0/, '');
+  const DECKS = [
+    { id: 'pv3', tag: 'Version actuelle', cur: true, title: 'Présentation — version 3 (sobre, 21 diapositives)', desc: 'Alignée sur l’exposé en six parties, sans pictogrammes. Se termine sur « Merci ».', base: 'Presentation_v3_actuelle' },
+    { id: 'pv3r', tag: 'Version 3 + réserve', title: 'Version 3 avec diapositives de réserve (23)', desc: 'Les mêmes 21 diapositives, plus « Papier ou GED » et « Ce que les habitants y gagnent » après « Merci », pour les questions du jury.', base: 'Presentation_v3_avec_diapositives_de_reserve' },
+    { id: 'pv2', tag: 'Ancienne version', title: 'Version 2 — menu latéral coloré (22 diapositives)', desc: 'La version précédente, avec les grands ronds de couleur, les pictogrammes et le sommaire à numéros géants.', base: 'Presentation_v2_menu_lateral' },
+  ];
+  const deckDoc = (d) => ({ id: d.id, title: d.title, category: d.tag, url: abs('private/' + d.base + '.pdf'), file_name: d.base + '.pdf', mime: 'application/pdf', _private: true });
+
+  function trTabs() {
+    document.querySelectorAll('.trtabs button').forEach((b) => b.addEventListener('click', () => {
+      document.querySelectorAll('.trtabs button').forEach((x) => { const on = x === b; x.setAttribute('aria-selected', on); $(x.getAttribute('aria-controls')).hidden = !on; });
+    }));
+  }
+  function renderDecks() {
+    $('deckList').innerHTML = DECKS.map((d) => `<article class="deckcard">
+      <span class="dtag ${d.cur ? 'cur' : ''}">${esc(d.tag)}</span>
+      <h3>${esc(d.title)}</h3><p>${esc(d.desc)}</p>
+      <div class="docbtns">
+        <button class="btn solid" type="button" data-deck="${d.id}" data-mode="present">Présenter</button>
+        <button class="btn" type="button" data-deck="${d.id}" data-mode="read">Lire</button>
+        <a class="btn" href="private/${d.base}.pptx" download>PowerPoint</a>
+        <a class="btn" href="private/${d.base}.pdf" download>PDF</a>
+      </div></article>`).join('');
+  }
+  $('deckList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-deck]'); if (!b) return;
+    const d = DECKS.find((x) => x.id === b.dataset.deck); if (!d) return;
+    if (b.dataset.mode === 'present') goFull();
+    showDoc(deckDoc(d), b.dataset.mode === 'present' ? 'present' : 'read');
+  });
+
+  // ---- chronomètre ----
+  const secs = () => (TR.data ? TR.data.sections : []);
+  function newRun() { return { running: false, t0: 0, before: 0, idx: 0, starts: [0], durs: [], finished: false, beeped: {} }; }
+  const elapsed = () => { const r = TR.run; return r.before + (r.running ? (performance.now() - r.t0) / 1000 : 0); };
+  function beep(freq = 880, len = 0.18) {
+    if (!$('tmSound').checked) return;
+    try { const C = window.AudioContext || window.webkitAudioContext; TR.ac = TR.ac || new C(); const o = TR.ac.createOscillator(), g = TR.ac.createGain(); o.frequency.value = freq; o.connect(g); g.connect(TR.ac.destination); g.gain.setValueAtTime(0.18, TR.ac.currentTime); g.gain.exponentialRampToValueAtTime(0.001, TR.ac.currentTime + len); o.start(); o.stop(TR.ac.currentTime + len); } catch (e) { /* pas de son */ }
+    if (navigator.vibrate) try { navigator.vibrate(120); } catch (e) {}
+  }
+  let wakeLk = null;
+  async function keepAwake(on) {
+    try { if (on && 'wakeLock' in navigator && !wakeLk) { wakeLk = await navigator.wakeLock.request('screen'); wakeLk.addEventListener('release', () => (wakeLk = null)); } if (!on && wakeLk) { await wakeLk.release(); wakeLk = null; } } catch (e) { /* facultatif */ }
+  }
+  function renderLine() {
+    const S = secs(), tot = TR.data.total;
+    $('tmLine').innerHTML = S.map((s, i) => `<span style="width:${((s.end - s.start) / tot) * 100}%" data-i="${i}"><i></i></span>`).join('') + '<b class="now" id="tmNow"></b>';
+  }
+  function renderList() {
+    const r = TR.run, S = secs();
+    $('tmList').innerHTML = S.map((s, i) => {
+      const plan = s.end - s.start, done = i < r.durs.length;
+      let d = `<span class="d">${fmt(plan)}</span>`;
+      if (done) { const diff = r.durs[i] - plan; d = `<span class="d ${cls(diff)}">${fmt(r.durs[i])} (${fmtD(diff)})</span>`; }
+      return `<li class="${i === r.idx && !r.finished ? 'cur' : ''} ${done ? 'done' : ''}" data-i="${i}"><b>${esc(s.title)}</b>${d}<span class="w">${fmt(s.start)} – ${fmt(s.end)}</span><span class="s">Diapo. ${esc(s.slides)}</span></li>`;
+    }).join('');
+  }
+  function renderPrompter(i) {
+    const s = secs()[i]; if (!s) return;
+    $('prTitle').textContent = s.title; $('prSlides').textContent = `Diapositives ${s.slides} · ${fmt(s.start)} – ${fmt(s.end)}`;
+    $('prBody').innerHTML = s.paras.map((p) => {
+      if (p.k === 'direction') return `<p class="dir">${esc(p.r[0][0])}</p>`;
+      const html = p.r.map(([t, b]) => (b ? `<b>${esc(t)}</b>` : esc(t))).join('');
+      return `<p class="${p.k === 'transition' ? 'tr' : ''}">${html}</p>`;
+    }).join('');
+    $('prBody').style.setProperty('--fs', TR.size + 'px');
+  }
+  function tick() {
+    const r = TR.run, S = secs(); if (!S.length) return;
+    const el = elapsed(), tot = TR.data.total;
+    $('tmClock').textContent = fmt(el);
+    if (r.finished) return;
+    const s = S[r.idx], inSec = el - r.starts[r.idx], plan = s.end - s.start, left = plan - inSec;
+    const L = $('tmLeft'); L.textContent = left >= 0 ? fmt(left) : '+' + fmt(-left).replace(/^0/, '');
+    L.className = left < 0 ? 'over' : left < 15 ? 'warn' : '';
+    $('tmPartName').textContent = s.title;
+    if (r.running && left <= 0 && !r.beeped[r.idx]) { r.beeped[r.idx] = 1; beep(); }
+    // fin prévue = maintenant + reste de la partie (≥ 0) + parties suivantes
+    const rest = Math.max(0, left) + S.slice(r.idx + 1).reduce((a, x) => a + (x.end - x.start), 0);
+    const eta = el + rest, drift = eta - tot;
+    $('tmEta').textContent = fmt(eta);
+    $('tmDrift').textContent = Math.abs(drift) < 5 ? 'dans les temps' : drift > 0 ? `en retard de ${fmt(drift).replace(/^0/, '')}` : `en avance de ${fmt(-drift).replace(/^0/, '')}`;
+    $('tmStatus').dataset.s = !r.running && el === 0 ? 'idle' : drift <= 10 ? 'ok' : drift <= 40 ? 'warn' : 'late';
+    // frise
+    const spans = $('tmLine').querySelectorAll('span');
+    spans.forEach((sp, i) => {
+      const x = S[i], pl = x.end - x.start, i_ = sp.querySelector('i');
+      let pct = 0;
+      if (i < r.idx) pct = 100; else if (i === r.idx) pct = Math.min(100, (inSec / pl) * 100);
+      i_.style.width = pct + '%';
+      sp.classList.toggle('done', i < r.idx); sp.classList.toggle('over', i === r.idx && left < 0);
+    });
+    const now = $('tmNow'); if (now) now.style.left = Math.min(100, (el / tot) * 100) + '%';
+  }
+  function setRunning(on) {
+    const r = TR.run;
+    if (on === r.running) return;
+    if (on) { r.t0 = performance.now(); r.running = true; } else { r.before = elapsed(); r.running = false; }
+    $('tmStart').textContent = r.running ? '❚❚ Pause' : (r.before > 0 ? '▶ Reprendre' : '▶ Démarrer');
+    $('tmNext').disabled = r.finished || (!r.running && r.before === 0);
+    $('tmPrev').disabled = r.idx === 0 || r.finished;
+    keepAwake(r.running);
+    clearInterval(TR.iv); if (r.running) TR.iv = setInterval(tick, 250);
+    tick();
+  }
+  function next() {
+    const r = TR.run, S = secs(); if (r.finished || (!r.running && r.before === 0)) return;
+    const el = elapsed();
+    r.durs[r.idx] = el - r.starts[r.idx];
+    if (r.idx >= S.length - 1) { finish(el); return; }
+    r.idx++; r.starts[r.idx] = el;
+    renderList(); renderPrompter(r.idx); $('tmPrev').disabled = false; tick();
+    $('prompter').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function prev() {
+    const r = TR.run; if (r.idx === 0 || r.finished) return;
+    r.idx--; r.durs.length = r.idx; r.starts.length = r.idx + 1; r.beeped[r.idx] = 0;
+    renderList(); renderPrompter(r.idx); $('tmPrev').disabled = r.idx === 0; tick();
+  }
+  function finish(el) {
+    const r = TR.run, S = secs(), tot = TR.data.total;
+    setRunning(false); r.finished = true; beep(660, 0.35);
+    $('tmNext').disabled = true; $('tmPrev').disabled = true; $('tmStart').textContent = '▶ Démarrer'; $('tmStart').disabled = true;
+    $('tmLeft').textContent = '—'; $('tmPartName').textContent = 'Exposé terminé';
+    const diffT = el - tot;
+    $('tmEta').textContent = fmt(el); $('tmDrift').textContent = Math.abs(diffT) < 5 ? 'pile dans les temps' : diffT > 0 ? `${fmt(diffT).replace(/^0/, '')} de trop` : `${fmt(-diffT).replace(/^0/, '')} de marge`;
+    $('tmStatus').dataset.s = diffT > 40 ? 'late' : diffT > 10 || diffT < -60 ? 'warn' : 'ok';
+    renderList();
+    const rows = S.map((s, i) => { const plan = s.end - s.start, d = r.durs[i] - plan; return `<tr><td>${esc(s.title)}</td><td class="n">${fmt(plan)}</td><td class="n">${fmt(r.durs[i])}</td><td class="n ${cls(d)}">${fmtD(d)}</td></tr>`; }).join('');
+    const worst = S.map((s, i) => [r.durs[i] - (s.end - s.start), s.title]).sort((a, b) => b[0] - a[0])[0];
+    $('tmResult').hidden = false;
+    $('tmResult').innerHTML = `<h3>Bilan de la répétition</h3><table><thead><tr><th>Partie</th><th class="n">Prévu</th><th class="n">Réel</th><th class="n">Écart</th></tr></thead><tbody>${rows}<tr><th>Total</th><th class="n">${fmt(tot)}</th><th class="n">${fmt(el)}</th><th class="n ${diffT > 40 ? 'late' : diffT > 10 || diffT < -60 ? 'warn' : 'ok'}">${fmtD(diffT)}</th></tr></tbody></table>` +
+      (diffT < -60 ? `<p class="hint" style="margin-top:12px">Exposé terminé avec ${fmt(-diffT).replace(/^0/, '')} d’avance : vous parlez sans doute trop vite. Respirez entre les parties et marquez les pauses indiquées.</p>` : worst && worst[0] > 15 ? `<p class="hint" style="margin-top:12px">À travailler en priorité : <b>${esc(worst[1])}</b> (${fmtD(worst[0])}).</p>` : `<p class="hint" style="margin-top:12px">Toutes les parties sont dans les temps. Bravo !</p>`);
+    try {
+      const H = JSON.parse(localStorage.getItem('tm-hist') || '[]');
+      H.unshift({ d: new Date().toISOString(), t: Math.round(el) }); localStorage.setItem('tm-hist', JSON.stringify(H.slice(0, 8)));
+    } catch (e) { /* stockage indisponible */ }
+    renderHist();
+  }
+  function renderHist() {
+    let H = [];
+    try { H = JSON.parse(localStorage.getItem('tm-hist') || '[]'); } catch (e) { H = []; }
+    $('tmHist').innerHTML = H.length ? `<h3>Dernières répétitions sur cet appareil</h3><ul>${H.map((h) => `<li>${new Date(h.d).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} — <b>${fmt(h.t)}</b> (${fmtD(h.t - TR.data.total)})</li>`).join('')}</ul>` : '';
+  }
+  function resetRun() {
+    if (TR.run) { clearInterval(TR.iv); keepAwake(false); }
+    TR.run = newRun();
+    $('tmStart').disabled = false; $('tmStart').textContent = '▶ Démarrer'; $('tmNext').disabled = true; $('tmPrev').disabled = true;
+    $('tmResult').hidden = true; $('tmClock').textContent = '00:00'; $('tmLeft').textContent = fmt(secs()[0].end - secs()[0].start); $('tmLeft').className = '';
+    $('tmPartName').textContent = 'Appuyez sur Démarrer'; $('tmEta').textContent = fmt(TR.data.total); $('tmDrift').textContent = 'au rythme prévu'; $('tmStatus').dataset.s = 'idle';
+    renderLine(); renderList(); renderPrompter(0); tick();
+  }
+  $('tmStart').addEventListener('click', () => setRunning(!TR.run.running));
+  $('tmNext').addEventListener('click', next);
+  $('tmPrev').addEventListener('click', prev);
+  $('tmReset').addEventListener('click', resetRun);
+  $('tmList').addEventListener('click', (e) => { const li = e.target.closest('li'); if (li) renderPrompter(+li.dataset.i); });
+  $('prBigger').addEventListener('click', () => { TR.size = Math.min(32, TR.size + 2); $('prBody').style.setProperty('--fs', TR.size + 'px'); });
+  $('prSmaller').addEventListener('click', () => { TR.size = Math.max(14, TR.size - 2); $('prBody').style.setProperty('--fs', TR.size + 'px'); });
+  document.addEventListener('keydown', (e) => {
+    if ($('v-entrainement').hidden || !viewer.hidden || !TR.run || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test((e.target && e.target.tagName) || '') && e.key === ' ') return;
+    if (e.key === ' ') { e.preventDefault(); if (!TR.run.finished) setRunning(!TR.run.running); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+  });
+  trTabs();
+  async function showTraining() {
+    if (!TR.loaded) {
+      try {
+        const r = await fetch(abs('api/training'), { credentials: 'same-origin', cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        TR.data = await r.json(); TR.loaded = true;
+        $('tmTotal').textContent = fmt(TR.data.total);
+        renderDecks(); resetRun(); renderHist();
+      } catch (e) {
+        $('prBody').innerHTML = '<p>Impossible de charger le texte de l’exposé. Vérifiez votre connexion puis rechargez la page.</p>';
+      }
+    }
+  }
+
   /* ---------------- branchement sur le routeur ---------------- */
   let ready = null;
   async function init() {
@@ -3006,6 +3362,10 @@ route();
         if (STORE.setupMode) { $('suUser').value = STORE.user || 'Aicha'; showForm('setup'); return; }
         if ($('newPwForm').hidden) showForm('login');
       }
+      if (v === 'entrainement') {
+        if (!STORE || !isAdmin()) { location.replace('#connexion'); return; }
+        showTraining();
+      }
       if (v === 'admin') {
         if (!STORE || !isAdmin()) { location.replace('#connexion'); return; }
         renderAdmin();
@@ -3016,7 +3376,7 @@ route();
   ready = init();
   // le routeur a déjà tourné avant ce script : rattrape un lien direct (#documents/…, #connexion, #admin)
   const h0 = (location.hash || '').slice(1).split('/');
-  if (['documents', 'connexion', 'admin'].includes(h0[0])) window.DOCS_APP.onView(h0[0], h0.slice(1).join('/'));
+  if (['documents', 'connexion', 'admin', 'entrainement'].includes(h0[0])) window.DOCS_APP.onView(h0[0], h0.slice(1).join('/'));
 })();
 
 </script>
